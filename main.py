@@ -18,7 +18,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "<b>Welcome to Apex Entries 📊</b>\n\n"
         "Join our free public group first, watch our performance, analysis, and execution style — "
         "then apply for VIP access if you want to take your trading to the next level.\n\n"
-        "Inside the free channel you’ll see:\n"
+        "Inside the free channel you'll see:\n"
         "• Free market analysis\n• Live trade ideas\n• Gold (XAUUSD) updates\n"
         "• Educational content\n• Real execution examples\n\n"
         "━━━━━━━━━━━━━━\n"
@@ -27,8 +27,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     
     # Check if this is a fresh /start command or a "Back" button press
     if update.message:
-        # Define paths to your local testimonial images
-        image_files = ["1.jpeg", "2.jpeg", "3.jpeg", "4.jpeg", "5.jpeg"]
+        # Define paths to your local testimonial images (UPDATED to match your filenames)
+        image_files = ["1 jpeg", "2 jpeg", "3 jpeg", "4 jpeg", "5 jpeg"]
         media_group = []
         
         # Build the media group array. Only the first image holds the caption for the album.
@@ -95,7 +95,7 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             "3️⃣ Log in and activate the promotion from the Bonus/Promotions section\n"
             "4️⃣ Fund the account\n"
             "5️⃣ Send your account ID screenshot\n\n"
-            "Once approved, you’ll receive the VIP group access link 🔐\n\n"
+            "Once approved, you'll receive the VIP group access link 🔐\n\n"
             "🎁 <b>Vantage Promotion:</b>\n"
             "• Get 150% bonus on your first deposit\n"
             "• Get 25% bonus on every future deposit"
