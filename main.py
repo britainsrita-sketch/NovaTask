@@ -27,33 +27,60 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     
     # Check if this is a fresh /start command or a "Back" button press
     if update.message:
-        # Define paths to your local testimonial images (UPDATED to match your filenames)
-        image_files = ["1 jpeg", "2 jpeg", "3 jpeg", "4 jpeg", "5 jpeg"]
+        # DEBUG: List all files in current directory
+        current_dir = os.getcwd()
+        all_files = os.listdir(current_dir)
+        logging.info(f"Current directory: {current_dir}")
+        logging.info(f"All files found: {all_files}")
+        
+        # Try multiple possible filename patterns
+        possible_names = [
+            "1 jpeg", "2 jpeg", "3 jpeg", "4 jpeg", "5 jpeg",  # With space
+            "1.jpeg", "2.jpeg", "3.jpeg", "4.jpeg", "5.jpeg",  # With dot
+            "1.jpg", "2.jpg", "3.jpg", "4.jpg", "5.jpg",      # With .jpg
+            "1", "2", "3", "4", "5"                            # Just numbers
+        ]
+        
+        # Find which files actually exist
+        image_files = []
+        for name in possible_names:
+            if os.path.exists(name):
+                image_files.append(name)
+                logging.info(f"Found image file: {name}")
+        
+        # If no files found with exact names, look for any jpeg/jpg files
+        if not image_files:
+            for file in all_files:
+                if file.lower().endswith(('.jpeg', '.jpg')):
+                    image_files.append(file)
+                    logging.info(f"Found image file by extension: {file}")
+        
         media_group = []
         
-        # Build the media group array. Only the first image holds the caption for the album.
-        for i, file_name in enumerate(image_files):
-            if os.path.exists(file_name):
+        # Build the media group array
+        for i, file_name in enumerate(image_files[:5]):  # Limit to 5 images
+            try:
                 with open(file_name, 'rb') as f:
+                    image_data = f.read()
                     if i == 0:
-                        media_group.append(InputMediaPhoto(media=f.read(), caption=text, parse_mode="HTML"))
+                        media_group.append(InputMediaPhoto(media=image_data, caption=text, parse_mode="HTML"))
                     else:
-                        media_group.append(InputMediaPhoto(media=f.read()))
-            else:
-                logging.warning(f"File {file_name} not found in the directory.")
+                        media_group.append(InputMediaPhoto(media=image_data))
+                logging.info(f"Successfully loaded: {file_name}")
+            except Exception as e:
+                logging.error(f"Error loading {file_name}: {e}")
 
         if media_group:
-            # Send the album containing your testimonials with the text attached
+            # Send the album with images
             await update.message.reply_media_group(media=media_group)
-            # Send the inline keyboard buttons immediately underneath the album
+            # Send the inline keyboard buttons underneath
             await update.message.reply_text("👇 Use the buttons below to proceed:", reply_markup=reply_markup)
         else:
-            # Fallback text-only if files are missing on Render
+            # Fallback: send text only
+            logging.warning("No images found, sending text-only message")
             await update.message.reply_text(text, reply_markup=reply_markup, parse_mode="HTML")
             
     else:
-        # If navigating via "Back" button, Telegram won't allow re-editing an album into text smoothly, 
-        # so we display a fresh text screen with the navigation menu.
         await update.callback_query.edit_message_text(text, reply_markup=reply_markup, parse_mode="HTML")
 
 # 2. Button Handler for the Flow
@@ -62,7 +89,6 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     await query.answer()
 
     if query.data == "joined_free":
-        # Second Screen: VIP Decision
         keyboard = [
             [InlineKeyboardButton("🏆 Apply For VIP Access", callback_data="apply_vip")],
             [InlineKeyboardButton("📩 Send Message To Support", callback_data="support_info")],
@@ -80,7 +106,6 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="HTML")
 
     elif query.data == "apply_vip":
-        # Third Screen: Registration Steps
         keyboard = [
             [InlineKeyboardButton("🔗 Register with Vantage", url="https://vigco.co/la-com/aRdk9CvK")],
             [InlineKeyboardButton("✅ Send ID to Support", url="https://t.me/reedexecution")],
@@ -103,7 +128,6 @@ async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await query.edit_message_text(text, reply_markup=reply_markup, parse_mode="HTML")
 
     elif query.data == "support_info":
-        # Support Screen
         keyboard = [
             [InlineKeyboardButton("👉 Contact Support", url="https://t.me/reedexecution")],
             [InlineKeyboardButton("⬅️ Back", callback_data="joined_free")]
